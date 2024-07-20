@@ -1431,8 +1431,98 @@ int Test01[100];
 //定长数组
 int Test02[]={1,2,3,4,5};
 //柔性数组
+int n=0;
+scanf("%d",n);
+int array[n];
+//变长数组，此操作不推荐，只能在Linux Gcc下编译
+//*(<ArrayName>+i)
+//数组的底层逻辑是指针
+//在sizeof(ArrayName)和&ArrayName中ArrayName代表整个数组
+//&ArrayName==><Type> (*)[Size];
+//指向整个数组的指针
+```
+
+###### 3.6.12.2 数组内存占用
+
+``` c
+printf("数组占用内存的大小：%d",sizeof(<ArrayName>));
+//求取数组占用内存
+```
+
+###### 3.6.12.2 数组初始化
+
+``` c
+int Array[4]={0,1,2,3};
 int Test03[100]={1,2,3};
 //数组长度为100，前三个元素初始化为1、2、3
 //后面元素全部初始化为0；
+int Array[100]={[0 ... 30]=10,[31 ... 60]=20,[61 ... 99]=30};
+//范围初始化，此操作不推荐，只能在Linux Gcc下编译
+<ArrayName>[Index]=<Value>;
+//数组元素的赋值
+```
+
+###### 3.6.12.3 数组遍历
+
+``` c
+int Array[100];
+for(int i=0;i<100;i++)
+{
+    printf("%d",Array[i]);
+}
+//循环遍历时的范围是数值，称魔术字
+//在修改数组大小时，需要同步修改遍历范围
+//在正式开发中不推荐，易出错
+int length=sizeof(Array)/sizeof(Array[0]);
+//通过这种方法获取数组长度更易于维护
+```
+
+#### 3.7 数据结构
+
+##### 3.7.1 排序
+
+###### 3.7.1.1 冒泡排序
+
+``` c
+void BubblingSort(int array[], int size)
+{
+	int j = 0;
+	for (j; j < size - 1; j++)
+	{
+		int i = 0;
+		for (i; i < size - 1 - j; i++)
+         //只用对未排序的部分进行操作
+         //如果用size-1,会进行无效遍历
+		{
+			if (array[i] > array[i + 1])
+			{
+				Swap(&array[i], &array[i + 1]);
+			}
+		}
+	}
+}
+```
+
+###### 3.7.1.2 选择排序
+
+``` c
+void SelectSort(int array[], int size)
+{
+	for (int i = 0; i < size - 1; i++)
+	{//n个元素n-1轮
+		int MinIndex = i;
+		for (int j = i+1; j < size; j++)
+		{
+			if (array[MinIndex] > array[j])
+			{
+				MinIndex = j;//直接更新下标
+			}
+		}
+		if (MinIndex != i)
+		{
+			Swap(&array[MinIndex], &array[i]);
+		}
+	}
+}
 ```
 
