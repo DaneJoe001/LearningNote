@@ -865,6 +865,9 @@ int main(int argc, char* argv[])
 }
 //分组以花括号表示
 //代码结束，会进行资源管理工作
+
+//封装函数，最好进行防御性编程
+//避免他人随意调用出现错误
 ```
 
 ##### 3.6.2 C语言编译过程
@@ -898,6 +901,8 @@ readelf -a Test
 
 #程序=数据结构+算法
 #可执行文件=代码+数据+依赖+依赖库中的函数地址
+gc  -m32 <filename.c>
+#以32位程序编译
 ```
 
 ``` mermaid
@@ -1142,6 +1147,12 @@ printf("%%");
 
 //程序需要刷新缓冲区
 //'/n'或用fflush(std)
+
+//%nd 用于格式化输出，保证左右对齐，确保输出占n位
+printf("%4d",1);
+//输出结果___1
+printf("%-4d",1);
+//输出结果1___
 ```
 
 ###### 3.6.6.2 输入语句
@@ -1160,6 +1171,13 @@ scanf("%s",str);
 scanf("%d+%f-%u %s",&a ,&b, &u, %s);
 //控制台应该严格输入格式
 //如此时10+10.0-16 字符串
+//scanf读取字符串遇到空格或换行会停止读取
+gets(<charArray>);
+//读取字符串直到遇到换行符
+//gets不安全，字符数组必须足够大
+fgets(<charArray>,<size>,<istream>);
+fgets(str,SIZE,stdin);
+//安全版本的输入
 ```
 
 ##### 3.6.7 标识符
@@ -1438,8 +1456,11 @@ int array[n];
 //*(<ArrayName>+i)
 //数组的底层逻辑是指针
 //在sizeof(ArrayName)和&ArrayName中ArrayName代表整个数组
+//类型皆为<Type>[<size>]
 //&ArrayName==><Type> (*)[Size];
 //指向整个数组的指针
+//C语言的数组都是静态的
+//gcc编译越界错误时，能通过，但运行时会出问题
 ```
 
 ###### 3.6.12.2 数组内存占用
@@ -1506,6 +1527,45 @@ int temp=*((*array+i)+j);
 ``` c
 int array[i][j][k];
 //平常很难遇到，初始化与一二维数组类似
+//数组拆解
+//第一层array[i] 第二层int[j][k] 第三层int[k]
+//int (*funPtr)[4](int, int);
+```
+
+###### 3.6.12.6 字符数组
+
+``` c
+//C语言字符串以'\0'结尾
+//字符数组存储的不一定是字符串
+char str[]={'a','b','c'};
+char str1[]={"abc"};
+char str2[]="abc";
+//字符数组初始化
+int length=strlen(str);
+//获取字符串长度，不包括'\0'
+int size=sizeof(str);
+//获取字符数组大小，包括'\0'
+//字符串本身是常量，不能直接赋值
+//可以对单个字符进行赋值
+//可以用strcpy()修改
+
+//字符串常用函数（位于string.h>)
+strlen(str);
+//获取字符串长度
+strcpy(<newstr>,<origin>);
+//复制字符串
+strncpy(*dest,*src);
+//安全版本
+strcat(*dest,*src);
+//拼接字符串
+strncat(*dest,*src);
+//安全版本
+strcmp(str0,str1);
+//比较字符串,相同返回0，不同返回-1
+
+char str[4][32];
+//二维字符数组
+char* str[4];
 ```
 
 #### 3.7 数据结构
