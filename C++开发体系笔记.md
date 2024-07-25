@@ -932,6 +932,32 @@ $ gcc 文件1.c 文件2.c -o 文件名
 #确保只有一个main函数
 ```
 
+###### 3.6.2.3 主函数解析
+
+``` c
+//argc
+int main(int argc,char const *argv[])
+{
+    printf("argc=%d\n",argc);
+    for(int i=0;i<argc;i++)
+    {
+        printf("argc[%d]=%s\n",i,argc[i]);
+	}
+}
+```
+
+``` bash
+$ gcc <file.c> -o <filename>
+$ ./<filename> <Parameters> <Parameters>
+#运行过程向主函数传递参数
+$ gcc function.c -o Test
+$ ./Test Hello world
+argc=3
+argc[0]=./Test
+argc[1]=Hello
+argc[2]=world
+```
+
 ##### 3.6.3 内存分区模型
 
 ###### 3.6.3.1 分区内容
@@ -1133,6 +1159,13 @@ double sum=(double)10/3;
 1 kB = 1024 B
 1 kb = 1024 b
 ASCII编码
+```
+
+###### 3.6.5.10 类型重定义
+
+``` c
+typedef int size_t;
+//定义size_t为int的别名
 ```
 
 ##### 3.6.6 标准输入输出
@@ -1497,6 +1530,8 @@ int array[n];
 //指向整个数组的指针
 //C语言的数组都是静态的
 //gcc编译越界错误时，能通过，但运行时会出问题
+memset(<arrayname>,0,sizeof(<arrayname>);
+//给数组清零 
 ```
 
 ###### 3.6.12.2 数组内存占用
@@ -1604,6 +1639,17 @@ char str[4][32];
 char* str[4];
 ```
 
+###### 3.6.12.7 结构体数组
+
+``` c
+struct Student
+{
+    char names[20];
+    int age;
+}stu[20];
+//创建结构体数组
+```
+
 ##### 3.6.13 函数
 
 ###### 3.6.13.1 函数概念
@@ -1660,6 +1706,73 @@ static void func01(){}
 //静态函数，只能在当前源文件使用
 extern void func02(){}
 //跨文件使用函数
+```
+
+##### 3.6.14 宏定义
+
+``` c
+#define <Name> <Value>
+#define MAX 100
+//宏定义将MAX替换为100
+#define <Name>(<Parament>) <Expression>
+#define SQUARE(r) 3.14*(r)*(r)
+double s=SQUARE(4);
+#define MULTI(NUM1,NUM2) ((NUM1)*(NUM2))
+//带参数的宏定义
+//参数要加括号，避免用表达式替换出现错误
+//整个表达式也要加括号，避免出现错误
+#define STR(s) #s
+//字符串参数
+printf("%s",STR("Hello"));
+#define CONCAT(s1,s2) s1##s2
+//拼接参数和变量名称
+double pi = 3.14;
+printf("%lf", CONCAT(p, i));
+#undef PI 3.14
+//取消宏定义 
+#define FUNCTION(name) FUNCTION##NAME
+//可用于函数多态
+```
+
+##### 3.6.15 结构体
+
+###### 3.6.15.1 结构体定义与声明
+
+``` c
+struct Person
+{
+    //结构体成员
+    int age;
+    char sex;
+    char names[32];
+}
+struct Person p1;
+//类型 变量名
+struct Person p2={16,'f',"采桑女"};
+//构造初始化时，可以直接给定字符串
+struct Person p3={.age=16,.sex='f',.names="采桑女"};
+//只能用于构造初始化
+
+typedef struct Student
+{
+    int age;
+}Stu,*Stup;
+typedef struct Person Person;
+//重定义结构体类型名
+```
+
+###### 3.6.15.2 访问结构体成员
+
+``` c
+struct Person p;
+int age=p.age;
+//访问p的age成员
+strcpy(p.names,str);
+//为p的names变量赋值
+//*(p.names)=str只能赋值第一个字符
+//p.names=str;左边是常量，不可修改，不能作为左值
+memset(p,0,sizeof(Person));
+//清零结构体
 ```
 
 #### 3.7 数据结构
