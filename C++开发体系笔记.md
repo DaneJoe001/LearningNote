@@ -825,20 +825,53 @@ C++语言高效
 
 #### 	3.5 编程开发工具
 
-##### 3.5.1 Windows平台
+##### 3.5.1 不同平台的开发工具
 
 ``` markdown
 Windows平台：Visual Studio IDE（Office, Wps, QQ, Wechat) 游戏
+x Ubuntu：编辑器vim emacs VSCode、编译器GCC、调试器GDB（分部件）Git：代码管理工具
 ```
 
-##### 3.5.2 Linux平台
+##### 3.5.2 Visual Studio IDE
+
+###### 3.5.2.1 版本选择与下载
 
 ``` markdown
-Ubuntu：编辑器vim emacs VSCode、编译器GCC、调试器GDB（分部件）
-Git：代码管理工具
+新版IDE可能存在不稳定或出现BUG等情况，推荐2017 15.9版本
 ```
 
+``` markdown
+不同公司的项目可能要依赖不同的库而选择不同的VS版本进行使用
+```
 
+``` markdown
+//资源网站
+https://msdn.itellyou.cn/
+```
+
+###### 3.5.2.2 项目创建与打开
+
+``` markdown
+最好使用英文目录
+```
+
+###### 3.5.2.3 常用热键
+
+``` markdown
+F7:编译
+F9:光标处切换断点
+F5:开始/继续调试，到下一个断点
+Shift+F5:停止调试
+F11:逐语句，会进入函数
+F10:逐过程，不会进入函数
+```
+
+###### 3.5.2.4 常用配置
+
+``` markdown
+右键项目名称进入属性界面
+可以设置链接库，预处理器等
+```
 
 #### 	3.6 C语言学习
 
@@ -932,30 +965,43 @@ $ gcc 文件1.c 文件2.c -o 文件名
 #确保只有一个main函数
 ```
 
-###### 3.6.2.3 主函数解析
+###### 3.6.2.3 条件编译
 
 ``` c
-//argc
-int main(int argc,char const *argv[])
-{
-    printf("argc=%d\n",argc);
-    for(int i=0;i<argc;i++)
-    {
-        printf("argc[%d]=%s\n",i,argc[i]);
-	}
-}
+#if <条件>
+//当条件为1时编译代码块
+//当条件为0时不编译代码块
+//代码块
+#endif
+
+#if NUM
+#endif
+//gcc -DNUM=1 myfile.c
 ```
 
-``` bash
-$ gcc <file.c> -o <filename>
-$ ./<filename> <Parameters> <Parameters>
-#运行过程向主函数传递参数
-$ gcc function.c -o Test
-$ ./Test Hello world
-argc=3
-argc[0]=./Test
-argc[1]=Hello
-argc[2]=world
+``` c
+#ifndef HEAD_H
+#define HEAD_H
+//代码块
+#endif
+//避免头文件重定义
+```
+
+``` c
+#define WITH_LOG
+//控制开关
+#ifdef WITH_LOG
+#define LOG(msg) printf("%s:%s:%d %s\n",__FILE__,__func__,__LINE__,(msg))
+//打印文件名函数名行数
+#else
+#define LOG(msg)
+#endif
+
+int main(void)
+{
+    LOG("abc");
+    return 0;
+}
 ```
 
 ##### 3.6.3 内存分区模型
@@ -1034,7 +1080,7 @@ double Size=sizeof(Element Type);
 //所有类型的数据都以二进制补码的形式存储
 ```
 
-###### 3.6.5.3 声明赋值和初始化
+###### 3.6.5.3 声明赋值
 
 ``` c
 //声明，在内存栈区开辟一块内存空间用于存放变量。
@@ -1166,6 +1212,21 @@ ASCII编码
 ``` c
 typedef int size_t;
 //定义size_t为int的别名
+typedef int int32_t;
+typedef long int64_t;
+
+typedef int Array[20];
+Array array;
+//相当于int array[20];
+
+typedef int (*ptr)[3];
+
+typedef int* (*FuncPtr)(int,int);
+//定义函数指针类型
+typedef int* (*OP)(int, int);
+int calculator(int num1,OP funcptr,int num2){
+    return (*funcptr)(num1, num2);
+}
 ```
 
 ###### 3.6.5.11 字节对齐
@@ -1177,7 +1238,24 @@ typedef int size_t;
 //前一个成员是否会补齐看后一个成员
 ```
 
-##### 3.6.6 标准输入输出
+###### 3.6.5.12 枚举类型
+
+``` c
+enum Week{
+    MON;//0
+    TUES;//1
+    WED;//2
+    THUR;//3
+    FRI;//4
+    SAT;//5
+    SUN;//6
+}
+//当枚举类型初始化不给值会自动赋值
+//当其中一个常量给值后，会自动调整后面元素的值
+//枚举类型是常量，本质是整型
+```
+
+##### 3.6.6 标准IO
 
 ###### 3.6.6.1 输出语句
 
@@ -1231,6 +1309,29 @@ printf("%4d",1);
 //输出结果___1
 printf("%-4d",1);
 //输出结果1___
+```
+
+``` c
+//颜色输出控制
+//彩色输出是通过在字符串中嵌入特定的转义序列来实现的，这些转义序列通常被称为ANSI转义序列（ANSI escape sequences）。这些序列在大多数现代终端和命令行界面中都是受支持的，包括Windows的CMD、PowerShell、Linux的终端以及各种IDE中的内置终端等。
+#include <stdio.h>  
+  
+// 定义ANSI颜色代码  
+#define ANSI_COLOR_RED   "\x1b[31m"  
+#define ANSI_COLOR_GREEN "\x1b[32m"  
+#define ANSI_COLOR_RESET "\x1b[0m"  
+  
+int main() {  
+    // 在控制台中打印红色文本  
+    printf(ANSI_COLOR_RED "This text is red.\n" ANSI_COLOR_RESET);  
+  
+    // 在控制台中打印绿色文本  
+    printf(ANSI_COLOR_GREEN "This text is green.\n" ANSI_COLOR_RESET);  
+  
+    // 注意：使用ANSI_COLOR_RESET来重置颜色，以避免后续文本也被着色  
+  
+    return 0;  
+}
 ```
 
 ###### 3.6.6.2 输入语句
@@ -1642,7 +1743,37 @@ strncat(*dest,*src);
 //安全版本
 strcmp(str0,str1);
 //比较字符串,相同返回0，不同返回-1
-
+int length=sprintf(<目标字符串>,<格式字符串>,<格式字符串参数>)
+//将格式化数据写入字符串，不成功返回-1
+char s[]="a=10,b=20";
+int a=0;
+int b=0;
+sscanf(s,"a=%d,b=%d",&a,&b);
+//格式化字符串中读取数值，不成功返回-1 
+char src[]="abcdef12345";
+char *p=strchr(src,'d');
+//查找指定字符，找到第一个，返回当前位置指针，没找到返回NULL
+//位于string.h
+strstr(<源字符串><子串>);
+//查找子串
+char src[]="abc*def*ghi*jkl*mno";
+char* s=strtok(src,"*");
+//分割字符串,返回第一个被分割的
+//分割点会被置空'\0'
+while (s != NULL)
+{
+	printf("%s\n", s);
+	s = strtok(NULL, "*");
+    //传递空值会调用上次字符串
+}
+//字符串转换函数(位于stdlib.h)
+//atoi字符串整数
+//atof字符串到浮点数
+//itoa整数到字符串
+//会忽略空格
+//遇到除e外的字符会失败
+//科学技术法能转换
+//转换失败返回0
 char str[4][32];
 //二维字符数组
 char* str[4];
@@ -1657,6 +1788,29 @@ struct Student
     int age;
 }stu[20];
 //创建结构体数组
+```
+
+###### 3.6.12.8 函数指针数组
+
+```c
+int add(int num1,int num2)
+{
+    return num1 + num2;
+}
+int sub(int num1, int num2)
+{
+    return num1 - num2;
+}
+int mul(int num1, int num2)
+{
+    return num1 * num2;
+}
+int div(int num1, int num2)
+{
+    return num1 / num2;
+}
+int (*operation[4])(int,int)={add,sub,mul,div};
+int result=(*operation[0])(2,4);
 ```
 
 ##### 3.6.13 函数
@@ -1708,22 +1862,98 @@ void function()
 //函数定义，可置于调用函数后
 ```
 
-###### 3.6.13.4 作用域与生存周期
+###### 3.6.13.4 作用范围
 
 ``` c
+//作用域与生命周期
 static void func01(){}
 //静态函数，只能在当前源文件使用
 extern void func02(){}
 //跨文件使用函数
 ```
 
+###### 3.6.13.5 一些函数
+
+``` c
+exit(0);
+//结束运行
+//位于stdlib.h
+```
+
+###### 3.6.13.6 主函数解析
+
+``` c
+//argc
+int main(int argc,char const *argv[])
+{
+    printf("argc=%d\n",argc);
+    for(int i=0;i<argc;i++)
+    {
+        printf("argc[%d]=%s\n",i,argc[i]);
+	}
+}
+```
+
+``` bash
+$ gcc <file.c> -o <filename>
+$ ./<filename> <Parameters> <Parameters>
+#运行过程向主函数传递参数
+$ gcc function.c -o Test
+$ ./Test Hello world
+argc=3
+argc[0]=./Test
+argc[1]=Hello
+argc[2]=world
+```
+
+###### 3.6.13.7 递归函数
+
+``` c
+//递归函数需要有递归退出条件
+//递归深度太深会导致栈溢出
+int func(int n)
+{
+    printf("%d ",n);
+    if(n==1){
+        //递归退出条件
+        return n;
+	}else{
+        //继续调用递归函数
+		return func(n-1);
+    }
+}
+```
+
+###### 3.6.13.8 回调函数
+
+``` c
+//利用函数指针
+//返回调用预先定义的函数
+int add(int num1,int num2){
+    return num1 + num2;
+}
+int sub(int num1, int num2){
+    return num1 - num2;
+}
+int calculator(int num1,OP funcptr,int num2){
+    return funcptr(num1, num2);
+}
+```
+
 ##### 3.6.14 宏定义
+
+###### 3.6.14.1 不带参数的宏
 
 ``` c
 #define <Name> <Value>
 #define MAX 100
 //宏定义将MAX替换为100
 #define <Name>(<Parament>) <Expression>
+```
+
+###### 3.6.14.2 带参数的宏
+
+``` c
 #define SQUARE(r) 3.14*(r)*(r)
 double s=SQUARE(4);
 #define MULTI(NUM1,NUM2) ((NUM1)*(NUM2))
@@ -1745,7 +1975,7 @@ printf("%lf", CONCAT(p, i));
 
 ##### 3.6.15 结构体
 
-###### 3.6.15.1 结构体定义与声明
+###### 3.6.15.1 定义与声明
 
 ``` c
 struct Person
@@ -1839,6 +2069,12 @@ double* ptr=&num;
 double* ptr2=ptr+2;
 int size=ptr2-ptr;
 //size=2,以元素长度为单位
+int a[5]={0};
+&a+1==&a[5];
+//此时计量单位为int[5] *
+int *p;
+p=0x100000;
+//十六进制单位为字节
 ```
 
 ###### 3.6.16.3 野指针
@@ -1907,6 +2143,48 @@ int (*ptr)[3]=array;
 //ptr就是一个指向有3个int元素的数组的指针，与a的类型相匹配
 ```
 
+###### 3.6.16.7 指针与字符串
+
+``` c
+char* str="hello";
+//"hello"是常量，位于字符常量区
+//该字符串不能进行修改
+char* str=(char*)malloc(sizeof(char)*6);
+//str="world"不会报错，但str会转而指向常量导致内存泄漏
+//上述操作后free会出问题
+strcpy(str,"world");
+```
+
+###### 3.6.16.8 函数指针
+
+``` c
+//函数名本身即为指针
+int add(int a, int b)
+{
+	return a + b;
+}
+int (*ptr)(int, int) = add;
+//(*ptr)需要用括号改变优先级
+```
+
+##### 3.6.17 共用体
+
+``` c
+typedef union Data{
+    int n;
+    char c;
+    double d;
+}Data;
+//共用体大小与最大成员有关
+//此共用体大小为8 Byte(double)
+//公用体公用一片存储空间
+Data data;
+data.n=97;
+//data.c结果就是'a'
+//给共用体成员赋值
+//不同成员会用不同的方式来解释这片内存空间
+```
+
 #### 3.7 数据结构
 
 ##### 3.7.1 排序
@@ -1956,3 +2234,20 @@ void SelectSort(int array[], int size)
 }
 ```
 
+#### 3.8 代码评审
+
+##### 3.8.1 开发流程
+
+``` mermaid
+graph LR
+A[需求分析]-->B[设计]
+B-->C[编码]
+C-->D[测试]
+D-->E[发布]
+```
+
+``` c
+主持（项目经理）（监督）
+记录
+代码评审：编码规范
+```
