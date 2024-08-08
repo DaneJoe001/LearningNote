@@ -677,7 +677,7 @@ int main() {
 1. **tolower(int c)**: 如果参数 `c` 是大写字母，则返回其小写形式；否则，返回该参数不变。
 2. **toupper(int c)**: 如果参数 `c` 是小写字母，则返回其大写形式；否则，返回该参数不变。
 
-### 注意事项
+##### 注意事项
 
 - 这些函数都接受一个 `int` 类型的参数，但实际上它们只处理该参数的低8位（即ASCII值或Unicode字符的某个表示）。
 - 返回值通常为非零值（表示真）或零值（表示假）。在C++中，这些返回值可以直接用于布尔表达式。
@@ -714,6 +714,77 @@ int main() {
 ```
 
 > 请注意，示例中的 `ch + '0'` 转换仅为演示目的，实际上它并不会将 `'A'` 转换为数字字符。正确的数字字符检查应该直接使用 `isdigit` 函数对数字字符（如 `'0'` 到 `'9'`）进行操作。
+
+#### `<fstream>`头文件
+
+> `fstream` 是 C++ 标准库中的一个头文件，它定义了用于文件输入/输出（I/O）的类。这个头文件结合了 `iostream` 和 `fstreambase` 的功能，允许程序以面向对象的方式进行文件的读写操作。`fstream` 提供的类能够处理顺序文件（即文件中的数据按照写入顺序被读取或写入），并且支持二进制模式和文本模式。
+
+##### 主要类
+
+- `ifstream`（input file stream）：用于从文件读取数据。它继承自 `istream` 类。
+- `ofstream`（output file stream）：用于向文件写入数据。它继承自 `ostream` 类。
+- `fstream`：同时支持读写操作。它继承自 `iostream` 类，结合了 `ifstream` 和 `ofstream` 的功能。
+
+##### 使用方法
+
+> 要使用 `fstream` 头文件中的类，首先需要包含这个头文件：
+
+```cpp
+#include <fstream>
+```
+
+> 然后，可以创建 `ifstream`、`ofstream` 或 `fstream` 的对象，并使用它们来打开文件、读写数据以及关闭文件。
+
+###### 打开文件
+
+> 所有这三个类都提供了 `open` 成员函数来打开文件。这个函数接受一个字符串参数（文件名），以及一个可选的模式参数（如 `ios::in`、`ios::out`、`ios::app`、`ios::binary` 等）来指定文件的打开方式。
+
+```cpp
+ifstream fileIn;
+fileIn.open("example.txt", ios::in);
+
+ofstream fileOut;
+fileOut.open("output.txt", ios::out | ios::trunc);
+
+fstream fileIO;
+fileIO.open("io.txt", ios::in | ios::out | ios::app);
+```
+
+###### 读写文件
+
+> 一旦文件被成功打开，就可以使用 `>>`（从文件读取）和 `<<`（向文件写入）操作符，或者成员函数如 `read`、`write`、`getline` 等来进行数据的读写操作。
+
+```cpp
+// 使用 ifstream 读取
+string line;
+while (getline(fileIn, line)) {
+    cout << line << endl;
+}
+
+// 使用 ofstream 写入
+fileOut << "Hello, World!" << endl;
+
+// 使用 fstream 读写
+fileIO << "Appending text." << endl;
+```
+
+###### 关闭文件
+
+> 完成文件操作后，应该使用 `close` 成员函数来关闭文件。虽然析构函数也会自动关闭文件，但显式关闭文件是一个好习惯，特别是在进行大量文件操作时。
+
+```cpp
+fileIn.close();
+fileOut.close();
+fileIO.close();
+```
+
+##### 注意事项
+
+- 在打开文件时，如果文件不存在且使用了 `ios::in` 模式，则 `open` 函数会失败。如果文件不存在且使用了 `ios::out` 或 `ios::out | ios::trunc` 模式，则会创建新文件。
+- 使用 `ios::app` 模式时，写入操作会将数据追加到文件末尾，而不是覆盖原有内容。
+- `fstream` 允许在打开文件时同时指定 `ios::in` 和 `ios::out` 模式，但这样做时，需要小心处理文件的位置指针，以免在读写操作中产生意外的结果。
+
+`fstream` 提供了灵活且强大的文件操作能力，是 C++ 程序中处理文件不可或缺的一部分。
 
 ## 第十七章 输入、输出和文件
 
