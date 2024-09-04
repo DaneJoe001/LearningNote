@@ -3148,6 +3148,33 @@ off_t lseek(int fd, off_t offset, int whence);
 // 返回值：成功时返回新的文件偏移量（相对于文件开头的字节数），失败时返回-1并设置errno。
 ```
 
+###### 4.6.2.3.5 文件信息
+
+``` c
+int stat(const char *pathname, struct stat *buf);
+//pathname：要查询状态信息的文件的路径名。
+//buf：指向 struct stat 结构的指针，该结构将被填充以描述文件的状态信息。
+//stat() 函数的返回值用于指示成功或错误。如果成功，它返回 0；如果失败，则返回 -1，并设置 errno 以指示错误原因。
+```
+
+```  markdown
+struct stat 结构通常包含以下一些字段（具体字段可能因系统而异，但以下是一些常见的）：
+
+dev_t st_dev：设备标识符（文件所在设备的标识符）。
+ino_t st_ino：文件的 i-node 编号。
+mode_t st_mode：文件类型和文件权限的位掩码（如普通文件、目录、符号链接等）。
+nlink_t st_nlink：链接到文件的硬链接数。
+uid_t st_uid：文件所有者的用户ID。
+gid_t st_gid：文件所有者的组ID。
+dev_t st_rdev：如果文件是特殊设备文件，则这是设备标识符。
+off_t st_size：文件的大小（以字节为单位）。
+blksize_t st_blksize：文件系统I/O的最佳块大小。
+blkcnt_t st_blocks：分配给文件的块数（512字节块）。
+time_t st_atime：最后访问时间。
+time_t st_mtime：最后修改时间。
+time_t st_ctime：最后状态改变时间（例如，权限或所有权变更）
+```
+
 ## 5. 项目开发
 
 ### 5.1 组织架构
@@ -4185,3 +4212,12 @@ int binarySearch(int* array,int target,int size)
     return -1;
 }
 ```
+
+## X. 常见错误
+
+### X.1 文件管理
+
+``` markdown
+中途出问题退出需要释放之前分配的资源;
+```
+
