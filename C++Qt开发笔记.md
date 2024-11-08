@@ -1529,6 +1529,268 @@ QChar ch7= str.at(7); //ch7='酒'
 //在 QString 字符串中，每个字符都是 QChar 类型，是用 UTF-16 编码的，一个汉字也是一个字符。所以，在上面这段代码里，ch0 是字符“d”，ch7 是字符“酒”。
 ```
 
+##### 2.1.9.3 常用操作
+
+######  1．字符串拼接
+
+```cpp
+使用加号运算符可以直接将两个 QString 字符串拼接为一个字符串。
+    
+QString str1= "洋洋", str2= "得意"; 
+QString str3= str1 + str2; //str3 ="洋洋得意" 
+str1= str2 + str1; //str1 ="得意洋洋" 
+
+函数 append()在当前字符串的后面添加字符串，函数 prepend()在当前字符串的前面添加字符串。
+    
+QString str1= "卖", str2= "拐"; 
+QString str3= str1; 
+str1.append(str2); //str1 ="卖拐" 
+str3.prepend(str2); //str3 ="拐卖"
+```
+
+######  2．字符串截取
+
+``` cpp
+（1）函数 front()和 back()。函数 front()返回字符串中的第一个字符，相当于 at(0)；函数 back()
+返回字符串中的最后一个字符。
+QString str1= "Hello,北京"; 
+QChar ch1= str1.front(); //ch1 ='H' 
+QChar ch2= str1.back(); //ch2 ='京' 
+
+（2）函数 left()和 right()。函数 left()从字符串中提取左边 n 个字符，函数 right()从字符串中提取右边 n 个字符，n 为设定参数。
+QString str1= ui->lineEdit->text(); 
+//编辑框的内容是"G:\Qt6Book\QtSamples\qw.cpp" 
+QString str2= str1.left(2); 
+//str2 ="G:" 
+str2= str1.right(3); 
+//str2 ="cpp" 
+
+（3）函数 first()和 last()。函数 first()从字符串中提取最前面的 n 个字符，函数 last()从字符串中提取最后面的 n 个字符，n 为设定参数。first()与 left()功能相同，last()与 right()功能相同，first()
+和 last()是 Qt 6.0 中引入的函数，执行速度更快。
+    
+QString str1= "G:\\Qt6Book\\QtSamples\\qw.cpp"; 
+//使用了转义字符“\\”
+QString str2= str1.first(2); 
+//str2 ="G:" 
+str2= str1.last(3); 
+//str2 ="cpp" 
+
+注意，在程序里直接输入字符串时，符号‘\’是转义字符的引导符，所以这段程序在给 str1赋值的字符串中使用“\\”表示一个字符‘\’。如果直接从界面上的 QLineEdit 等组件中获取输入字符串，则不用关注是否存在转义字符，Qt 会自动处理。
+    
+（4）函数 mid()。函数 mid()用于返回字符串中的部分字符串，其函数原型定义如下：
+QString QString::mid(qsizetype pos, qsizetype n = -1) 
+其中，pos 是起始位置，n 是返回字符串中的字符个数。如果不指定参数 n，就返回从 pos 开始到末尾的字符串，如果 pos+n 超过了字符串的边界，返回的字符串就为 null。
+    
+QString str1= "G:\\Qt6Book\\QtSamples\\qw.cpp"; 
+int N= str1.lastIndexOf("\\"); 
+//获取最后一个‘\’出现的位置
+QString str2= str1.mid(N+1); 
+//str2 ="qw.cpp" 
+
+（5）函数 sliced()。sliced()与 mid()的功能相同，也是返回字符串的片段。sliced()是 Qt 6.0 中引入的函数，它有两种不同的参数形式，其函数原型定义如下：
+    
+QString QString::sliced(qsizetype pos, qsizetype n) 
+    //返回从位置pos开始的n个字符的字符串
+QString QString::sliced(qsizetype pos) 
+    //返回从位置 pos 开始到末尾的字符串
+    
+在函数 sliced()中，如果设置的参数会导致超出字符串的边界，则函数的行为是不确定的，但如果是在边界内，则 sliced()的执行速度比 mid()的快。
+    
+QString str1= "G:\\Qt6Book\\QtSamples\\qw.cpp"; 
+int N= str1.lastIndexOf("\\"); 
+//获取最后一个‘\’出现的位置
+QString str2= str1.sliced(N+1); 
+//str2 ="qw.cpp" 
+str2= str1.sliced(N+1, 2); 
+//str2 ="qw" 
+
+（6）函数 section()。函数 section()的原型定义如下：
+QString QString::section(const QString &sep, qsizetype start, qsizetype end = -1, 
+ QString::SectionFlags flags = SectionDefault) 
+    
+其功能是从字符串中提取以 sep 作为分隔符，从 start 段到 end 段的字符串，例如：
+QString str2, str1= "学生姓名,男,2003-6-15,汉族,山东"; 
+str2= str1.section(",",0,0); //str2 ="学生姓名"，第一段的编号为 0 
+str2= str1.section(",",1,1); //str2 ="男" 
+str2= str1.section(",",0,1); //str2 ="学生姓名，男" 
+str2= str1.section(",",4,4); //str2 ="山东" 
+```
+
+######  3．存储相关的函数
+
+``` cpp
+（1）函数 isNull()和 isEmpty()。这两个函数都会判断字符串是否为空，但是稍有差别。如果是一个空字符串，也就是只有“\0”，则 isNull()返回 false，而 isEmpty()返回 true。只有未被赋值时，isNull()才返回 true。
+    
+QString str1, str2=""; 
+bool N= str1.isNull(); //N =true，未赋值
+N= str2.isNull(); //N =false，已被赋值，不为 null 
+N= str1.isEmpty(); //N =true 
+N= str2.isEmpty(); //N =true 
+
+QString 只要被赋值了，就会在字符串的末尾自动加上“\0”。所以，如果只是要判断字符串内容是否为空，应该使用函数 isEmpty()。
+    
+（2）函数 count()、size()和 length()。函数 size()和 length()都返回字符串中的字符个数，它们的功能相同。不带有任何参数的函数 count()与这两个函数功能相同，此外，count()还有带参数的形式，可统计某个字符串在当前字符串中出现的次数。
+    
+QString str1= "NI 好"; 
+int N= str1.count(); //N =3 
+N= str1.size(); //N =3 
+N= str1.length(); //N =3 
+
+（3）函数 clear()。函数 clear()清空当前字符串，使字符串为 null。
+    
+QString str1=""; 
+bool N= str1.isNull(); 
+//N =false，字符串已被赋值，不为 null 
+N= str1.isEmpty(); 
+//N =true，字符串内容为空
+str1.clear(); 
+N= str1.isNull(); 
+//N =true，运行 clear()后，字符串变为 null 
+
+（4）函数 resize()。函数 resize()改变字符串长度，该函数的一种函数原型定义如下：
+    
+void QString::resize(qsizetype size) 
+如果参数 size 大于字符串当前长度，就扩充字符串，但新增的字符是不确定的；如果参数 size小于字符串当前长度，字符串会缩短为 size 个字符，多余的字符丢失。
+    
+函数 resize()还有另一种参数形式，即可以用一个字符填充字符串中扩充的位置，其原型定义如下：
+    
+void QString::resize(qsizetype size, QChar fillChar) 
+函数 resize()可用于预分配字符串的长度，也可以在字符串内容初始化时用给定的字符进行填充，例如：
+    
+QString str1; 
+bool chk= str1.isNull(); //chk =true 
+str1.resize(5,'0'); //str1 ="00000" 
+
+（5）函数 fill()。函数 fill()将字符串中的每个字符都用一个新字符替换，且可以改变字符串长度，函数原型定义如下：
+QString &QString::fill(QChar ch, qsizetype size = -1) 
+其中，ch 是要设置的字符，size 是设置的字符串新的长度，如果不设置 size 参数的值，表示保持字符串长度不变。
+    
+QString str1= "Hello"; 
+str1.fill('X'); //str1 ="XXXXX" 
+str1.fill('A',2); //str1 ="AA" 
+str1.fill(QChar(0x54C8),3); 
+//str1 ="哈哈哈"，0x54C8 是'哈'的 UTF-16 编码
+
+注意，在传递某个字符构造 QChar 对象时，对于 ASCII 字符可以直接使用字符，但是对于汉字不能直接使用字符，而要用汉字的 Unicode 编码构造 QChar 对象。
+```
+
+######  4.   搜索和判断
+
+``` cpp
+（1）函数 indexOf()和 lastIndexOf()。函数 indexOf()的功能是在当前字符串内查找某个字符串首次出现的位置，其函数原型定义如下：
+    
+qsizetype QString::indexOf(const QString &str, qsizetype from = 0, 
+ Qt::CaseSensitivity cs = Qt::CaseSensitive) 
+参数 str 是要查找的字符串，参数 from 是开始查找的位置，参数 cs 指定是否区分大小写。参数 cs 的取值 Qt::CaseInsensitive 表示不区分大小写，取值 Qt::CaseSensitive 表示区分大小写。
+函数 lastIndexOf()的功能则是在当前字符串内查找某个字符串最后出现的位置。
+    
+QString str1= "G:\\Qt6Book\\QtSamples\\qw.cpp"; 
+int N= str1.indexOf("Qt"); //N =3 
+N= str1.lastIndexOf("\\"); //N =20 
+
+（2）函数 contains()。函数 contains()判断当前字符串是否包含某个字符串，可指定是否区分大小写。
+    
+QString str1= "G:\\Qt6Book\\QtSamples\\qw.cpp"; 
+bool N= str1.contains(".cpp"); 
+//N =true，默认区分大小写
+N= str1.contains(".CPP"); 
+//N =false，默认区分大小写
+N= str1.contains(".CPP", Qt::CaseInsensitive); 
+//N =true，不区分大小写
+
+（3）函数endsWith()和startsWith()。函数startsWith()判断是否以某个字符串开头，函数endsWith()判断是否以某个字符串结束。
+    
+QString str1= "G:\\Qt6Book\\QtSamples\\qw.cpp"; 
+bool N= str1.endsWith(".CPP", Qt::CaseInsensitive); 
+//N =true，不区分大小写
+N= str1.endsWith(".CPP", Qt::CaseSensitive); 
+//N =false，区分大小写
+N= str1.startsWith("g:"); 
+//N =false，默认区分大小写
+
+（4）函数 count()。带有参数的 count()统计当前字符串中某个字符串出现的次数，可以设置是否区分大小写。
+    
+QString str1= "G:\\Qt6Book\\QtSamples\\qw.cpp"; 
+bool N= str1.count("Qt"); 
+//N =2，默认区分大小写 
+N= str1.count("QT"); 
+//N =0，默认区分大小写
+N= str1.count("QT", Qt::CaseInsensitive); 
+//N =2，不区分大小写
+```
+
+###### 5．字符串转换和修改
+
+``` cpp
+（1）函数 toUpper()和 toLower()。函数 toUpper()将字符串内的字母全部转换为大写字母，toLower()将字符串内的字母全部转换为小写字母。
+    
+QString str1= "Hello, World", str2; 
+str2= str1.toUpper(); //str2 ="HELLO, WORLD" 
+str2= str1.toLower(); //str2 ="hello, world" 
+
+（2）函数 trimmed()和 simplified()。函数 trimmed()会去掉字符串首尾的空格，函数 simplified()不仅会去掉字符串首尾的空格，还会将中间连续的空格用单个空格替换。
+    
+QString str1= " Are you OK? ", str2; 
+str2= str1.trimmed(); //str2 ="Are you OK?" 
+str2= str1.simplified(); //str2 ="Are you OK?" 
+
+（3）函数 chop()。函数 chop()去掉字符串末尾的 n 个字符，n 是输入参数。如果 n 大于或等于字符串实际长度，字符串内容就变为空。
+    
+QString str1= "widget.cpp"; 
+str1.chop(4); 
+//str1 ="widget"，去掉了最后 4 个字符
+
+（4）函数 insert()。函数 insert()在字符串中的某个位置插入一个字符串，它修改当前字符串的内容，并返回字符串对象的引用。函数 insert()的一种原型定义如下：
+QString &QString::insert(qsizetype pos, const QString &str) 
+参数 pos 表示需要插入的位置，如果 pos 大于字符串长度，字符串会自动补空格扩充长度。
+QString str1= "It is great"; 
+int N= str1.lastIndexOf(" "); 
+//最后一个空格的位置
+str1.insert(N, "n’t"); 
+//str1 ="It isn't great" 
+
+（5）函数 replace()。函数 replace()的一种原型定义如下：
+QString &QString::replace(qsizetype pos, qsizetype n, const QString &after) 
+    
+其功能是从字符串的 pos 位置开始替换 n 个字符，替换后的字符串是 after。该函数会修改当前字符串的内容，并返回字符串对象的引用。替换后的字符串 after 的长度可以小于 n 或大于 n，例如：
+    
+QString str1= "It is great"; 
+int N= str1.lastIndexOf(" "); 
+//最后一个空格的位置
+QString subStr= "wonderful"; 
+str1.replace(N+1, subStr.size(), subStr); 
+//str1 ="It is wonderful" 
+str1.replace(N+1, subStr.size(), "OK!"); 
+//str1 ="It is OK!" 
+
+函数 replace()还有另一种参数形式，即可以替换字符串中所有特定的字符，其函数原型定义
+如下：
+QString &QString::replace(QChar before, QChar after, 
+ Qt::CaseSensitivity cs = Qt::CaseSensitive) 
+其功能是将字符串中的所有字符 before 替换为字符 after，可以设置是否区分大小写，例如：
+QString str1= "Goooogle"; 
+str1.replace('o', 'e'); 
+//str1 ="Geeeegle" 
+
+（6）函数 remove()。其功能是从字符串的 pos 位置开始移除 n 个字符，一种原型定义如下：
+    
+QString &QString::remove(qsizetype pos, qsizetype n) 
+如果 n 超出了字符串的长度，就把 pos 后面的字符都移除，例如：
+QString str1= "G:\\Qt6Book\\QtSamples\\qw.cpp"; 
+int N= str1.lastIndexOf("\\"); 
+str1.remove(N+1, 20); 
+// str1 ="G:\Qt6Book\QtSamples\" 
+
+函数 remove()还有另一种参数形式，即可以移除字符串中某个字符出现的所有实例，例如：
+    
+QString str1= "你的，我的，他的"; 
+QString DeStr= "的"; 
+QChar DeChar= QChar(DeStr[0].unicode()); 
+//获取汉字'的'的 Unicode 编码，再创建 QChar 对象
+str1.remove(DeChar); 
+//str1 ="你，我，他"
+```
+
 #### 2.1.10 QChar类
 
 ##### 2.1.10.1 基本定义
