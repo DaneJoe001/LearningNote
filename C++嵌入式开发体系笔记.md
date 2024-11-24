@@ -6022,17 +6022,17 @@ struct sembuf {
 - 共享内存和信号量的使用需要谨慎，以避免资源泄漏和死锁等问题。
 ```
 
-### 8.3.7 消息队列
+#### 8.3.7 消息队列
 
-#### 8.3.7.1 基本概念
+##### 8.3.7.1 基本概念
 
 ``` markdown
 消息队列是一种进程间通信机制，允许进程以消息的形式交换数据。消息队列可以存储多个消息，并且可以按照优先级进行处理。
 ```
 
-#### 8.3.7.2 相关函数
+##### 8.3.7.2 相关函数
 
-##### 8.3.7.2.1 msgget函数
+###### 8.3.7.2.1 msgget函数
 
 ``` cpp
 #include <sys/types.h>
@@ -6054,7 +6054,7 @@ int msgget(key_t key, int msgflg);
 //创建或打开一个消息队列，返回其标识符。
 ```
 
-##### 8.3.7.2.2 msgsnd函数
+###### 8.3.7.2.2 msgsnd函数
 
 ``` cpp
 #include <sys/types.h>
@@ -6075,7 +6075,7 @@ int msgsnd(int msqid, const void *msgp, size_t msgsz, int msgflg);
 //向消息队列发送一条消息。
 ```
 
-##### 8.3.7.2.3 msgrcv函数
+###### 8.3.7.2.3 msgrcv函数
 
 ``` cpp
 #include <sys/types.h>
@@ -6108,7 +6108,7 @@ struct msgbuf {
 };
 ```
 
-#### 8.3.7.3 注意事项
+##### 8.3.7.3 注意事项
 
 ``` markdown
 - 确保在程序中处理信号和错误。
@@ -6116,7 +6116,437 @@ struct msgbuf {
 - 使用完消息队列后，应及时删除，使用`msgctl()`函数进行删除。
 ```
 
+## 9. 网络编程
+
+### 9.1 基本概念
+
+#### 9.1.1 网络类型
+
+##### 9.1.1.1 局域网
+
+```
+特点：有限、小范围、短距离通信。
+```
+
+##### 9.1.1.2 广域网
+
+```
+特点：传输距离远。
+```
+
+#### 9.1.2 地址划分
+
+##### 9.1.2.1 特殊地址
+
+````
+回环地址：用于测试本地网络协议栈的功能，通常是 127.0.0.1。
+全为1表示广播地址，全为0表示网络号。
+````
+
+##### 9.1.2.2 子网掩码
+
+```
+用于分离网络号和主机号。
+主机号位数决定最大主机数量。
+```
+
+#### 9.1.3 网络设备
+
+##### 9.1.3.1 交换机
+
+```
+工作在数据链路层，使用 MAC 地址进行数据转发。
+```
+
+##### 9.1.3.2 路由器
+
+```
+工作在网络层，使用 IP 地址进行数据转发。
+```
+
+#### 9.1.4 网络协议
+
+##### 9.1.4.1 传输层协议
+
+###### 9.1.4.1.1 TCP协议
+
+```
+特点：面向连接、可靠传输、效率低于 UDP。
+适用场合：传输质量要求高的场景。
+连接管理：
+四次握手：建立连接的过程。
+三次挥手：断开连接的过程。
+```
+
+###### 9.1.4.1.2 UDP协议
+
+```
+特点：面向数据、不可靠传输、效率高。
+适用场合：传输效率要求高且数据允许丢失的场景，如音视频聊天。
+```
+
+#### 9.1.5 端口号
+
+##### 9.1.5.1 基本概念
+
+``` 
+功能：用于区分不同进程。
+默认端口：80（HTTP）。
+范围：0~65535（短整型，两个字节）。
+IANA 管理：负责分配和管理端口号。
+```
+
+##### 9.1.5.2 端口分类
+
+```
+系统端口：1~1023（需要特权）。
+注册端口：1024~49151（可被应用程序使用）。
+```
+
+#### 9.1.6 字节序
+
+##### 9.1.6.1 统一字节序
+
+```
+网络字节序：大端（Big Endian）。
+主机字节序：依赖于具体的计算机架构。
+```
+
+##### 9.1.6.2 转换字节序
+
+```
+只需转换数字以适应网络字节序。
+```
+下面是更新后的笔记，分别列出了 TCP 和 UDP 的基本操作，并在相关函数中添加了 UDP 使用的一些函数。保持了原有的格式和结构。
+
+### 9.2 Socket 编程
+
+#### 9.2.1 基本概念
+
+```markdown
+Socket 编程是一种用于进程间通信的机制，通常用于网络编程。通过 socket，客户端和服务器可以在网络上进行数据交换。
+```
+
+#### 9.2.2 套接字类型
+
+##### 9.2.2.1 流式套接字
+
+```
+- 类型：`SOCK_STREAM`
+- 协议：TCP
+- 特点：面向连接，提供可靠的字节流服务。
+```
+
+##### 9.2.2.2 数据包套接字
+
+```
+- 类型：`SOCK_DGRAM`
+- 协议：UDP
+- 特点：无连接，不保证可靠性，适合发送小数据包。
+```
+
+##### 9.2.2.3 原始套接字：
+
+```
+- 类型：`SOCK_RAW`
+- 用途：用于 ICMP 等协议，允许直接访问网络层。
+```
+
+#### 9.2.3 基本操作
+
+##### 9.2.3.1 TCP 服务器端
+
+```cpp
+// 创建 socket
+int fd = socket(AF_INET, SOCK_STREAM, 0);
+
+// 服务地址：ip:port
+struct sockaddr_in server_addr;
+server_addr.sin_family = AF_INET;
+server_addr.sin_addr.s_addr = INADDR_ANY; // 绑定到所有可用地址
+server_addr.sin_port = htons(port); // 设置端口号
+
+// 绑定 socket
+bind(fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+
+// 监听连接
+listen(fd, BACKLOG); // BACKLOG 是等待连接的队列长度
+
+// 接收拨打方的连接
+int client_fd = accept(fd, (struct sockaddr *)&client_addr, &addr_len);
+
+// 收发数据
+send(client_fd, buffer, size, 0);
+recv(client_fd, buffer, size, 0);
+
+// 关闭连接
+close(client_fd);
+close(fd);
+```
+
+##### 9.2.3.2 TCP 客户端
+
+```cpp
+// 创建 socket
+int fd = socket(AF_INET, SOCK_STREAM, 0);
+
+// 服务端的 IP 和端口
+struct sockaddr_in server_addr;
+server_addr.sin_family = AF_INET;
+inet_pton(AF_INET, "server_ip", &server_addr.sin_addr); // 将 IP 字符串转换为网络字节序
+server_addr.sin_port = htons(port); // 设置端口号
+
+// 连接到服务器
+connect(fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+
+// 收发数据
+send(fd, buffer, size, 0);
+recv(fd, buffer, size, 0);
+
+// 关闭连接
+close(fd);
+```
+
+##### 9.2.3.3 UDP 服务器端
+
+```cpp
+// 创建 socket
+int fd = socket(AF_INET, SOCK_DGRAM, 0);
+
+// 服务地址：ip:port
+struct sockaddr_in server_addr;
+server_addr.sin_family = AF_INET;
+server_addr.sin_addr.s_addr = INADDR_ANY; // 绑定到所有可用地址
+server_addr.sin_port = htons(port); // 设置端口号
+
+// 绑定 socket
+bind(fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+
+// 接收数据
+struct sockaddr_in client_addr;
+socklen_t addr_len = sizeof(client_addr);
+recvfrom(fd, buffer, size, 0, (struct sockaddr *)&client_addr, &addr_len);
+
+// 发送数据
+sendto(fd, buffer, size, 0, (struct sockaddr *)&client_addr, addr_len);
+
+// 关闭连接
+close(fd);
+```
+
+##### 9.2.3.4 UDP 客户端
+
+```cpp
+// 创建 socket
+int fd = socket(AF_INET, SOCK_DGRAM, 0);
+
+// 服务端的 IP 和端口
+struct sockaddr_in server_addr;
+server_addr.sin_family = AF_INET;
+inet_pton(AF_INET, "server_ip", &server_addr.sin_addr); // 将 IP 字符串转换为网络字节序
+server_addr.sin_port = htons(port); // 设置端口号
+
+// 发送数据
+sendto(fd, buffer, size, 0, (struct sockaddr *)&server_addr, sizeof(server_addr));
+
+// 接收数据
+recvfrom(fd, buffer, size, 0, NULL, NULL);
+
+// 关闭连接
+close(fd);
+```
+
+#### 9.2.4 相关函数
+
+##### 9.2.4.1 socket 函数
+
+```cpp
+int socket(int domain, int type, int protocol);
+/* 
+参数：
+- int domain：地址族（如 AF_INET 表示 IPv4）。
+- int type：套接字类型（如 SOCK_STREAM 或 SOCK_DGRAM）。
+- int protocol：协议（通常为 0，表示默认协议）。
+
+返回值：
+- 成功时返回新的文件描述符（非负整数）。
+- 失败时返回 -1，并设置 errno 以指示错误类型。
+
+作用：
+- 创建一个新的套接字，并返回其文件描述符。
+*/
+```
+
+##### 9.2.4.2 bind 函数
+
+```cpp
+int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+/* 
+参数：
+- int sockfd：套接字的文件描述符。
+- const struct sockaddr *addr：指向包含地址信息的结构体的指针。
+- socklen_t addrlen：地址信息的长度。
+
+返回值：
+- 成功时返回 0。
+- 失败时返回 -1，并设置 errno 以指示错误类型。
+
+作用：
+- 将套接字与特定的地址（IP 和端口）绑定。
+*/
+```
+
+##### 9.2.4.3 listen 函数
+
+```cpp
+int listen(int sockfd, int backlog);
+/* 
+参数：
+- int sockfd：套接字的文件描述符。
+- int backlog：最大连接请求队列长度。
+
+返回值：
+- 成功时返回 0。
+- 失败时返回 -1，并设置 errno 以指示错误类型。
+
+作用：
+- 将套接字设置为被动监听状态，准备接受连接请求。
+*/
+```
+
+##### 9.2.4.4 accept 函数
+
+```cpp
+int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+/* 
+参数：
+- int sockfd：监听套接字的文件描述符。
+- struct sockaddr *addr：指向用于存储连接地址的结构体的指针（可以为 NULL）。
+- socklen_t *addrlen：指向地址长度的指针，用于返回实际地址长度。
+
+返回值：
+- 成功时返回新的套接字文件描述符（用于与客户端通信）。
+- 失败时返回 -1，并设置 errno 以指示错误类型。
+
+作用：
+- 接受来自客户端的连接请求，并返回一个新的套接字用于后续通信。
+*/
+```
+
+##### 9.2.4.5 send 函数
+
+```cpp
+ssize_t send(int sockfd, const void *buf, size_t len, int flags);
+/* 
+参数：
+- int sockfd：套接字的文件描述符。
+- const void *buf：指向要发送的数据的缓冲区。
+- size_t len：要发送的数据字节数。
+- int flags：标志位（通常为 0）。
+
+返回值：
+- 成功时返回实际发送的字节数。
+- 失败时返回 -1，并设置 errno 以指示错误类型。
+
+作用：
+- 向连接的对端发送数据。
+*/
+```
+
+##### 9.2.4.6 recv 函数
+
+```cpp
+ssize_t recv(int sockfd, void *buf, size_t len, int flags);
+/* 
+参数：
+- int sockfd：套接字的文件描述符。
+- void *buf：指向用于存储接收数据的缓冲区。
+- size_t len：缓冲区的大小。
+- int flags：标志位（通常为 0）。
+
+返回值：
+- 成功时返回实际接收的字节数。
+- 失败时返回 -1，并设置 errno 以指示错误类型。
+
+作用：
+- 从连接的对端接收数据。
+*/
+```
+
+##### 9.2.4.7 connect 函数
+
+```cpp
+int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+/* 
+参数：
+- int sockfd：套接字的文件描述符。
+- const struct sockaddr *addr：指向包含服务器地址的结构体的指针。
+- socklen_t addrlen：地址的长度。
+
+返回值：
+- 成功时返回 0。
+- 失败时返回 -1，并设置 errno 以指示错误类型。
+
+作用：
+- 发起与服务器的连接请求。
+*/
+```
+
+##### 9.2.4.8 sendto 函数（UDP）
+
+```cpp
+ssize_t sendto(int sockfd, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
+/* 
+参数：
+- int sockfd：套接字的文件描述符。
+- const void *buf：指向要发送的数据的缓冲区。
+- size_t len：要发送的数据字节数。
+- int flags：标志位（通常为 0）。
+- const struct sockaddr *dest_addr：指向目标地址的结构体的指针。
+- socklen_t addrlen：目标地址的长度。
+
+返回值：
+- 成功时返回实际发送的字节数。
+- 失败时返回 -1，并设置 errno 以指示错误类型。
+
+作用：
+- 向指定的地址发送数据。
+*/
+```
+
+##### 9.2.4.9 recvfrom 函数（UDP）
+
+```cpp
+ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *src_addr, socklen_t *addrlen);
+/* 
+参数：
+- int sockfd：套接字的文件描述符。
+- void *buf：指向用于存储接收数据的缓冲区。
+- size_t len：缓冲区的大小。
+- int flags：标志位（通常为 0）。
+- struct sockaddr *src_addr：指向用于存储源地址的结构体的指针（可以为 NULL）。
+- socklen_t *addrlen：指向地址长度的指针，用于返回实际地址长度。
+
+返回值：
+- 成功时返回实际接收的字节数。
+- 失败时返回 -1，并设置 errno 以指示错误类型。
+
+作用：
+- 从任意地址接收数据。
+*/
+```
+
+#### 9.2.5 注意事项
+
+```markdown
+- 确保在程序中处理错误和异常情况。
+- 在使用 socket 后，及时关闭连接以释放资源。
+- 服务器端应处理多个客户端的连接，通常可以使用多线程或多进程模型。
+- 对于 UDP，注意处理数据包的丢失和乱序情况。
+``` 
+
 ## X. 常见错误
+
 
 ### X.1 文件管理
 
