@@ -7053,6 +7053,31 @@ uint32_t ntohl(uint32_t netlong);
 */
 ```
 
+###### 9.4.2.10.6 setsockopt
+
+``` c
+int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen);
+//参数：
+// sockfd: 套接字描述符，指向要设置选项的套接字。
+// level: 选项级别，可以是SOL_SOCKET或其他协议层的选项。
+// optname: 要设置的选项名称，具体取决于level。
+// optval: 指向要设置的选项值的指针。
+// optlen: optval指向的选项值的大小（字节数）。
+//返回值：
+// 成功时返回0，失败时返回-1，并设置errno以指示错误类型。
+//功能：
+// setsockopt函数用于设置套接字的选项，可以配置套接字的行为，如超时、缓冲区大小等。
+```
+
+| level       | optname       | 作用               |
+| ----------- | ------------- | ------------------ |
+| SOL_SOCKET  | SO_REUSEADDR  | 允许重用本地地址   |
+| SOL_SOCKET  | SO_BROADCAST  | 允许发送广播       |
+| SOL_SOCKET  | SO_RCVBUF     | 设置接收缓冲区大小 |
+| SOL_SOCKET  | SO_SNDBUF     | 设置发送缓冲区大小 |
+| IPPROTO_TCP | TCP_NODELAY   | 禁用Nagle算法      |
+| IPPROTO_TCP | TCP_KEEPALIVE | 启用TCP的保活功能  |
+
 #### 9.2.5 socakaddr_in结构体
 
 ```c
@@ -7274,6 +7299,83 @@ int nfds = epoll_wait(epfd, events, MAX_EVENTS, timeout);
 // 返回值: 成功返回发生的事件数量，失败返回-1。
 ```
 
+## 11. 数据库
+
+
+### 11.1 基本查询
+
+#### 11.1.1 数据库
+
+##### 11.1.1.1 创建数据
+
+```sql
+CREATE DATABASE <database_name>;
+--说明：创建一个新的数据库。`<database_name>` 是你想要创建的数据库名称。
+```
+##### 11.1.1.2 删除数据库
+
+```sql
+DROP DATABASE <database_name>;
+--说明：删除指定的数据库及其所有数据和表。
+```
+##### 11.1.1.3 使用数据库
+
+```sql
+USE <database_name>;
+--说明：选择并使用指定的数据库。
+```
+#### 11.1.2 表数据
+
+##### 11.1.2.1 插入语句
+
+```sql
+INSERT INTO <table_name> (column1, column2, ...) VALUES (value1, value2, ...);
+--说明：向指定表中插入一条新记录。确保列名和对应的值匹配。
+```
+##### 11.1.2.2 删除语句
+
+```sql
+DELETE FROM <table_name> WHERE <condition>;
+--说明：根据指定条件删除表中的记录。若不加条件，将删除表中所有记录。
+```
+##### 11.1.2.3 修改语句
+
+```sql
+UPDATE <table_name> SET column1 = value1, column2 = value2, ... WHERE <condition>;
+--说明：根据指定条件更新表中的记录。确保提供条件以避免更新所有记录。
+```
+##### 11.1.2.4 查询语句
+
+```sql
+SELECT column1, column2, ... FROM <table_name> WHERE <condition> ORDER BY <column> ASC|DESC LIMIT <quantity>;
+--说明：从指定表中查询记录。可以选择特定的列、添加条件、排序和限制结果数量。
+```
+#### 11.1.3 表结构
+
+##### 11.1.3.1 添加列
+
+```sql
+ALTER TABLE <table_name> ADD COLUMN column_name data_type;
+--说明：向指定表中添加新列。
+```
+##### 11.1.3.2 删除列
+
+```sql
+ALTER TABLE <table_name> DROP COLUMN column_name;
+--说明：从指定表中删除列。
+```
+##### 11.1.3.3 修改列
+
+```sql
+ALTER TABLE <table_name> MODIFY COLUMN column_name new_data_type;
+--说明：修改指定列的数据类型或其他属性。
+```
+##### 11.1.3.4 重命名列
+
+```sql
+ALTER TABLE <table_name> RENAME COLUMN old_column_name TO new_column_name;
+--说明：重命名指定列。
+```
 ## X. 常见错误
 
 
